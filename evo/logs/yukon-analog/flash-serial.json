@@ -1,0 +1,33 @@
+{
+  "url": "http://127.0.0.1:8080",
+  "model": "qwen38-flash-next-amd",
+  "pairs": [
+    {
+      "prompt_n": 1385,
+      "predicted_n": 128,
+      "prompt_ms": 5197.466,
+      "predicted_ms": 4874.021,
+      "prompt_per_second": 266.4760096554744,
+      "predicted_per_second": 26.056514733933238,
+      "prefill_s_per_tok": 0.003752683032490975,
+      "decode_s_per_tok": 0.0380782890625,
+      "wall_s": 10.27,
+      "draft_n": null,
+      "draft_n_accepted": null
+    },
+    {
+      "prompt_n": 4,
+      "predicted_n": 128,
+      "prompt_ms": 100.306,
+      "predicted_ms": 5098.472,
+      "prompt_per_second": 39.87797340139174,
+      "predicted_per_second": 24.909423843065138,
+      "prefill_s_per_tok": 0.025076499999999998,
+      "decode_s_per_tok": 0.0398318125,
+      "wall_s": 5.204,
+      "draft_n": null,
+      "draft_n_accepted": null
+    }
+  ],
+  "prompt_chars": 6497
+}

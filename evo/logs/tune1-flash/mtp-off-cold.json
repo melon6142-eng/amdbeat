@@ -1,0 +1,15 @@
+{
+  "ttft_ms": 1621.5,
+  "tok_s": 34.25,
+  "predicted_n": 65,
+  "prompt_n": 63,
+  "prompt_ms": 597.882,
+  "predicted_ms": 1897.747,
+  "prompt_per_second": 105.37196302949411,
+  "predicted_per_second": 33.72420032807324,
+  "wall_s": 2.569,
+  "chars": 161,
+  "label": "cold",
+  "model": "qwen38-flash-next-amd",
+  "prompt": "Write a one-sentence definition of a hash table."
+}

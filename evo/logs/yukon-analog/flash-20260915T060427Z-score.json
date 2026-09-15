@@ -1,0 +1,79 @@
+{
+  "formula": "prefill_gain^0.25 * decode_gain^0.75",
+  "official": false,
+  "track": "evo-vulkan-analog",
+  "prefill_gain": 1.0123,
+  "decode_gain": 0.95,
+  "composite": 0.9652,
+  "increase_pct": -3.5,
+  "serial_prefill_tps": 69.4,
+  "serial_decode_tps": 25.7,
+  "cand_prefill_tps": 70.2,
+  "cand_decode_tps": 20.6,
+  "serial": {
+    "url": "http://127.0.0.1:8080",
+    "model": "qwen38-flash-next-amd",
+    "pairs": [
+      {
+        "prompt_n": 1385,
+        "predicted_n": 128,
+        "prompt_ms": 5197.466,
+        "predicted_ms": 4874.021,
+        "prompt_per_second": 266.4760096554744,
+        "predicted_per_second": 26.056514733933238,
+        "prefill_s_per_tok": 0.003752683032490975,
+        "decode_s_per_tok": 0.0380782890625,
+        "wall_s": 10.27,
+        "draft_n": null,
+        "draft_n_accepted": null
+      },
+      {
+        "prompt_n": 4,
+        "predicted_n": 128,
+        "prompt_ms": 100.306,
+        "predicted_ms": 5098.472,
+        "prompt_per_second": 39.87797340139174,
+        "predicted_per_second": 24.909423843065138,
+        "prefill_s_per_tok": 0.025076499999999998,
+        "decode_s_per_tok": 0.0398318125,
+        "wall_s": 5.204,
+        "draft_n": null,
+        "draft_n_accepted": null
+      }
+    ],
+    "prompt_chars": 6497
+  },
+  "candidate": {
+    "url": "http://127.0.0.1:8080",
+    "model": "qwen38-flash-next-amd",
+    "pairs": [
+      {
+        "prompt_n": 1385,
+        "predicted_n": 128,
+        "prompt_ms": 4866.892,
+        "predicted_ms": 5537.244,
+        "prompt_per_second": 284.5758648435182,
+        "predicted_per_second": 22.935597564420135,
+        "prefill_s_per_tok": 0.0035140014440433213,
+        "decode_s_per_tok": 0.043259718749999995,
+        "wall_s": 10.504,
+        "draft_n": 127,
+        "draft_n_accepted": 50
+      },
+      {
+        "prompt_n": 4,
+        "predicted_n": 128,
+        "prompt_ms": 99.863,
+        "predicted_ms": 6910.942,
+        "prompt_per_second": 40.054875178995225,
+        "predicted_per_second": 18.376655454495207,
+        "prefill_s_per_tok": 0.02496575,
+        "decode_s_per_tok": 0.053991734375,
+        "wall_s": 7.015,
+        "draft_n": 200,
+        "draft_n_accepted": 77
+      }
+    ],
+    "prompt_chars": 6497
+  }
+}

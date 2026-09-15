@@ -1,0 +1,40 @@
+{
+  "stamp": "2026-09-15T05:40:13Z",
+  "host": "user-EVO-X3",
+  "kernel": "7.0.0-31-generic",
+  "cmdline_amd": [
+    "amdgpu.virtual_display=0000:66:00.0,1920x1080@60",
+    "amd_iommu=on",
+    "iommu=pt",
+    "amdgpu.gttsize=122880",
+    "ttm.pages_limit=31457280"
+  ],
+  "nproc": "32",
+  "governor": "performance",
+  "dpm": "auto",
+  "vram_total_gib": 96.0,
+  "gtt_total_gib": 120.0,
+  "vram_used_gib": 0.35,
+  "gtt_used_gib": 0.05,
+  "mesa": "25.2.8-0ubuntu0.24.04.2",
+  "rocm": "7.2.1",
+  "trees": {
+    "rocmfpx": {
+      "path": "$HOME/code/llama.cpp-rocmfpx",
+      "head": "5e085d123eead2e89b5c19f824fccb05727da6a2",
+      "oneline": "5e085d1 rocmfpx : credit charlie12345/ROCmFPX as the origin of the format",
+      "remote": "https://github.com/LaurentZuijdwijk/llama.cpp.git"
+    },
+    "strix": {
+      "path": "$HOME/src/strix-llama.cpp",
+      "head": "c7af5c6c29902eb1f7b3bd7952607e2349e1c668",
+      "oneline": "c7af5c6 Merge pull request #18 from halo-box/import/fork-master-optimizations",
+      "remote": "https://ghfast.top/https://github.com/halo-box/strix-llama.cpp.git"
+    }
+  },
+  "model": {
+    "path": "$MODELS_DIR/rocmfp4/flash-next/Qwen3.8-Flash-Next-ROCmFP4-FAST-v2-ple16.gguf",
+    "sha256": "552a7a162f6a620c3aa0850d070086bc2b95094e0a4e8b860694c7f212cb59d8",
+    "bytes": 93484237760
+  }
+}

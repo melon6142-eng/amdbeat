@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>gfx1151.fast · EVO-X3</title>
+  <style>
+    body { margin: 0; font-family: ui-sans-serif, system-ui; background: #0b1220; color: #e2e8f0; }
+    main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    h1 { font-size: 1.25rem; }
+    .sub { color: #94a3b8; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: right; padding: 0.45rem 0.55rem; border-bottom: 1px solid #1e293b; }
+    th:first-child, td:first-child { text-align: left; }
+    .blocked { color: #f87171; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>gfx1151.fast</h1>
+    <p class="sub">Qwen3.8-Flash-Next · EVO-X3 only · not a frontier.fast submission. HIP Flash is blocked until finding 001 is fixed.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>arm</th>
+          <th>backend</th>
+          <th>d0 decode</th>
+          <th>8K decode</th>
+          <th>32K decode</th>
+          <th>32K prefill</th>
+          <th>128K prefill</th>
+          <th>note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>rocmfpx 5e085d1</td>
+          <td>Vulkan</td>
+          <td id="vk-d0">pending</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>lab path, 47 t/s claim to reproduce</td>
+        </tr>
+        <tr>
+          <td>halo-box/strix</td>
+          <td>Vulkan</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>source on box, no build yet</td>
+        </tr>
+        <tr>
+          <td>MIX HIP</td>
+          <td class="blocked">HIP</td>
+          <td class="blocked">blocked</td>
+          <td class="blocked">blocked</td>
+          <td class="blocked">blocked</td>
+          <td class="blocked">blocked</td>
+          <td class="blocked">blocked</td>
+          <td class="blocked">29 GiB visible / 88G model</td>
+        </tr>
+        <tr>
+          <td>stock llama.cpp</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>not on disk</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
