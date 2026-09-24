@@ -1,0 +1,89 @@
+Rewrite the entire Python file below with these changes:
+1) Add structured logging via the stdlib logging module (INFO for enqueue/process, WARNING for retries, ERROR for failures).
+2) Add a `cancel(name: str) -> int` method that removes all pending jobs with that name and returns how many were removed.
+3) Add a `Snapshot` dataclass and `snapshot() -> Snapshot` that freezes stats, pending count, done, and failed lists.
+4) Make `drain` honor a soft time budget `budget_s: float | None = None` so it stops early when elapsed wall time exceeds the budget.
+5) Keep type hints, docstring, and a working `demo()` that exercises cancel + snapshot + budget.
+Return the FULL rewritten file contents only (all lines).
+
+```python
+#!/usr/bin/env python3
+"""Mini task queue with retries, priorities, and simple metrics."""
+from __future__ import annotations
+import heapq
+import time
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
+
+@dataclass(order=True)
+class Job:
+    priority: int
+    created: float
+    name: str = field(compare=False)
+    payload: dict = field(compare=False, default_factory=dict)
+    attempts: int = field(compare=False, default=0)
+
+class TaskQueue:
+    def __init__(self, max_attempts: int = 3, workers: int = 2):
+        self.max_attempts = max_attempts
+        self.workers = workers
+        self._heap: list[Job] = []
+        self._done: list[str] = []
+        self._failed: list[str] = []
+        self._handlers: dict[str, Callable[[dict], Any]] = {}
+        self.stats = {"enqueued": 0, "processed": 0, "retried": 0, "failed": 0}
+
+    def register(self, name: str, fn: Callable[[dict], Any]) -> None:
+        self._handlers[name] = fn
+
+    def enqueue(self, name: str, payload: Optional[dict] = None, priority: int = 100) -> None:
+        job = Job(priority=priority, created=time.time(), name=name, payload=payload or {})
+        heapq.heappush(self._heap, job)
+        self.stats["enqueued"] += 1
+
+    def _run_one(self, job: Job) -> bool:
+        handler = self._handlers.get(job.name)
+        if handler is None:
+            self._failed.append(job.name)
+            self.stats["failed"] += 1
+            return False
+        try:
+            handler(job.payload)
+            self._done.append(job.name)
+            self.stats["processed"] += 1
+            return True
+        except Exception as exc:  # noqa: BLE001
+            job.attempts += 1
+            if job.attempts < self.max_attempts:
+                job.priority = min(job.priority + 10, 999)
+                heapq.heappush(self._heap, job)
+                self.stats["retried"] += 1
+                return False
+            self._failed.append(f"{job.name}:{exc}")
+            self.stats["failed"] += 1
+            return False
+
+    def drain(self, limit: int = 50) -> dict:
+        n = 0
+        while self._heap and n < limit:
+            job = heapq.heappop(self._heap)
+            self._run_one(job)
+            n += 1
+        return dict(self.stats)
+
+    def pending(self) -> int:
+        return len(self._heap)
+
+def demo() -> None:
+    q = TaskQueue()
+    q.register("echo", lambda p: print("echo", p.get("msg")))
+    q.register("boom", lambda p: (_ for _ in ()).throw(RuntimeError("boom")))
+    q.enqueue("echo", {"msg": "hi"}, priority=1)
+    q.enqueue("boom", {}, priority=5)
+    q.enqueue("echo", {"msg": "bye"}, priority=2)
+    print(q.drain())
+    print("pending", q.pending(), "done", q._done, "failed", q._failed)
+
+if __name__ == "__main__":
+    demo()
+```

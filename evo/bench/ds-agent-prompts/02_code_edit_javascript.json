@@ -1,0 +1,19 @@
+{
+  "model": "deepseek-v4-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a careful coding assistant. Return a complete rewritten JavaScript module only."
+    },
+    {
+      "role": "user",
+      "content": "Rewrite the entire Node.js module below with these changes:\n1) Add `touch(key, ttlMs?)` to refresh TTL without changing the value; return false if missing/expired.\n2) Add `sweep()` that purges all expired keys and returns the count removed.\n3) Add LRU eviction: constructor option `maxEntries`; on set, if over capacity, evict least-recently-used key (track lastAccess).\n4) Make `get`/`set`/`touch` update lastAccess; include lastAccess in watcher events.\n5) Export a small `demo()` function that shows touch, sweep, and eviction.\nReturn the FULL rewritten file only.\n\n```javascript\n// Simple in-memory KV with TTL, watchers, and batch ops.\nclass TtlStore {\n  constructor(defaultTtlMs = 60000) {\n    this.defaultTtlMs = defaultTtlMs;\n    this.map = new Map(); // key -> { value, expiresAt }\n    this.watchers = new Map(); // key -> Set<fn>\n    this.hits = 0;\n    this.misses = 0;\n  }\n\n  _now() { return Date.now(); }\n\n  _purge(key) {\n    const e = this.map.get(key);\n    if (!e) return false;\n    if (e.expiresAt !== null && e.expiresAt <= this._now()) {\n      this.map.delete(key);\n      this._notify(key, null, \"expire\");\n      return true;\n    }\n    return false;\n  }\n\n  set(key, value, ttlMs = this.defaultTtlMs) {\n    const expiresAt = ttlMs == null ? null : this._now() + ttlMs;\n    this.map.set(key, { value, expiresAt });\n    this._notify(key, value, \"set\");\n    return value;\n  }\n\n  get(key) {\n    this._purge(key);\n    if (!this.map.has(key)) { this.misses++; return undefined; }\n    this.hits++;\n    return this.map.get(key).value;\n  }\n\n  del(key) {\n    this._purge(key);\n    const ok = this.map.delete(key);\n    if (ok) this._notify(key, null, \"del\");\n    return ok;\n  }\n\n  mget(keys) {\n    const out = {};\n    for (const k of keys) out[k] = this.get(k);\n    return out;\n  }\n\n  mset(entries, ttlMs) {\n    for (const [k, v] of Object.entries(entries)) this.set(k, v, ttlMs);\n  }\n\n  watch(key, fn) {\n    if (!this.watchers.has(key)) this.watchers.set(key, new Set());\n    this.watchers.get(key).add(fn);\n    return () => this.watchers.get(key)?.delete(fn);\n  }\n\n  _notify(key, value, op) {\n    const set = this.watchers.get(key);\n    if (!set) return;\n    for (const fn of set) {\n      try { fn({ key, value, op, ts: this._now() }); } catch (_) {}\n    }\n  }\n\n  stats() {\n    return { size: this.map.size, hits: this.hits, misses: this.misses };\n  }\n\n  keys() {\n    for (const k of [...this.map.keys()]) this._purge(k);\n    return [...this.map.keys()];\n  }\n}\n\nmodule.exports = { TtlStore };\n```"
+    }
+  ],
+  "temperature": 0,
+  "max_tokens": 768,
+  "stream": false,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}

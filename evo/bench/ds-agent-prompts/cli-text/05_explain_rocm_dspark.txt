@@ -1,0 +1,10 @@
+Write a detailed technical explanation of running DeepSeek V4 Flash MoE inference on AMD Strix Halo (gfx1151) with ROCm, covering at least these numbered sections:
+1. Hardware and memory topology
+2. GGUF quantization choices for routed experts (IQ2XXS / Q2_K hybrids)
+3. Prefill vs decode compute characteristics
+4. KV-cache sizing for 64k context
+5. Speculative decoding with DSpark: draft propose, verify, accept/reject, scheduler
+6. Common failure modes (no-draft, verify cost, acceptance vs net_saved)
+7. Practical benchmarking methodology for agent-style long generations
+8. Tuning checklist with concrete flags and env vars
+Each section should have multiple paragraphs and concrete numbers or formulas where useful. Do not summarize briefly; expand fully.

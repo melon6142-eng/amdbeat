@@ -1,0 +1,19 @@
+{
+  "model": "deepseek-v4-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a senior systems engineer. Write thorough technical explanations with numbered sections. Do not stop early; aim for a long answer."
+    },
+    {
+      "role": "user",
+      "content": "Write a detailed technical explanation of running DeepSeek V4 Flash MoE inference on AMD Strix Halo (gfx1151) with ROCm, covering at least these numbered sections:\n1. Hardware and memory topology\n2. GGUF quantization choices for routed experts (IQ2XXS / Q2_K hybrids)\n3. Prefill vs decode compute characteristics\n4. KV-cache sizing for 64k context\n5. Speculative decoding with DSpark: draft propose, verify, accept/reject, scheduler\n6. Common failure modes (no-draft, verify cost, acceptance vs net_saved)\n7. Practical benchmarking methodology for agent-style long generations\n8. Tuning checklist with concrete flags and env vars\nEach section should have multiple paragraphs and concrete numbers or formulas where useful. Do not summarize briefly; expand fully."
+    }
+  ],
+  "temperature": 0,
+  "max_tokens": 768,
+  "stream": false,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}

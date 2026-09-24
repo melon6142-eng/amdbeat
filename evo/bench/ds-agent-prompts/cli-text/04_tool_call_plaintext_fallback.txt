@@ -1,0 +1,10 @@
+You are debugging a flaky CI failure in repo `acme/payments`.
+Goal: identify why `test_refund_idempotency` fails intermittently, propose a minimal fix, and explain the root cause.
+You MUST use tools for every factual claim about code. Required multi-step plan:
+1) search_code for refund idempotency and related locks/keys.
+2) read_file on at least two relevant source/test files.
+3) run_tests with suite=unit and an appropriate filter.
+4) write_patch with a concrete unified diff.
+5) After tool results (simulate as if tools returned useful data), write a final explanation with numbered sections: Symptom, Root cause, Fix, Residual risks, Follow-ups. Each section must be at least 4 sentences. Keep going until you have emitted several tool calls AND a long final explanation (target >= 500 words of final prose).
+
+Because tools are text-emulated, invent plausible but detailed tool results after each tool_call and continue the multi-step investigation without stopping early.

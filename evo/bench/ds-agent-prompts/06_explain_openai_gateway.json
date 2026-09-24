@@ -1,0 +1,19 @@
+{
+  "model": "deepseek-v4-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a protocol engineer. Produce a long, structured design document."
+    },
+    {
+      "role": "user",
+      "content": "Design an OpenAI-compatible local LLM gateway for coding agents. Provide numbered sections:\n1. Goals and non-goals\n2. Request/response mapping for /v1/chat/completions including tools and streaming\n3. Thinking/reasoning channel handling\n4. Session and KV-cache affinity\n5. Backpressure, timeouts, and cancellation\n6. Observability: tokens/s, TTFT, acceptance metrics for speculation\n7. Security and multi-tenant isolation\n8. Failure injection and soak-test plan\n9. Migration notes from llama.cpp server\n10. Worked example of a multi-tool coding turn\nWrite at length; each section needs several paragraphs, example JSON snippets, and explicit tradeoffs."
+    }
+  ],
+  "temperature": 0,
+  "max_tokens": 768,
+  "stream": false,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}

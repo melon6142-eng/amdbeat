@@ -1,0 +1,19 @@
+{
+  "model": "deepseek-v4-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an autonomous coding agent. The runtime does NOT support native tools. Instead emit tool calls as standalone XML-like blocks exactly of the form:\n<tool_call>{\"name\":\"read_file\",\"arguments\":{\"path\":\"...\"}}</tool_call>\nYou may emit multiple tool_call blocks. After imagined tool results, continue. Finish with a long FINAL ANSWER section."
+    },
+    {
+      "role": "user",
+      "content": "You are debugging a flaky CI failure in repo `acme/payments`.\nGoal: identify why `test_refund_idempotency` fails intermittently, propose a minimal fix, and explain the root cause.\nYou MUST use tools for every factual claim about code. Required multi-step plan:\n1) search_code for refund idempotency and related locks/keys.\n2) read_file on at least two relevant source/test files.\n3) run_tests with suite=unit and an appropriate filter.\n4) write_patch with a concrete unified diff.\n5) After tool results (simulate as if tools returned useful data), write a final explanation with numbered sections: Symptom, Root cause, Fix, Residual risks, Follow-ups. Each section must be at least 4 sentences. Keep going until you have emitted several tool calls AND a long final explanation (target >= 500 words of final prose).\n\nBecause tools are text-emulated, invent plausible but detailed tool results after each tool_call and continue the multi-step investigation without stopping early."
+    }
+  ],
+  "temperature": 0,
+  "max_tokens": 768,
+  "stream": false,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}

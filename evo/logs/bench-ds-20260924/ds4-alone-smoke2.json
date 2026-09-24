@@ -1,0 +1,1 @@
+{"id":"chatcmpl-0d745c4b43a92c13aab83bd3","object":"chat.completion","created":1790240376,"model":"deepseek-v4-flash","choices":[{"index":0,"message":{"role":"assistant","content":"Hi there!"},"finish_reason":"stop"}],"usage":{"prompt_tokens":11,"completion_tokens":3,"total_tokens":14,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":11}}}
