@@ -1,0 +1,35 @@
+{
+  "source": "prior artifact $HOME/rocket-rec/sites/spark-qwen/index.html",
+  "live_endpoint_status": "DOWN for qwen3.8-flash-next",
+  "live_on_8888": "deepseek-v4-flash-0731 @ http://<host>:8888 (also .81)",
+  "note": "Did NOT swap Spark off DeepSeek; Flash-Next recipe starts on :8001 and stops DeepSeek",
+  "recorded_cst": "2026-09-25T22:58:48.252789+08:00",
+  "html_checks": {
+    "has_doctype": true,
+    "has_close_html": true,
+    "has_three": true,
+    "has_raf": true,
+    "has_launch": true,
+    "has_scene": true,
+    "bytes": 51955
+  },
+  "prior_halogen_qwen_site_checks": {
+    "has_doctype": true,
+    "has_close_html": true,
+    "has_three": true,
+    "has_raf": true,
+    "has_launch": true,
+    "bytes": 43413
+  },
+  "bring_up": {
+    "repo": "https://github.com/MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark",
+    "on_spark": "cd ~/src/Qwen3.8-Flash-Next-Single-DGX-Spark && cp .env.sample .env && ./download.sh && ./start.sh  # default :8888; lab_control uses PORT=8001",
+    "lab_control_load": "stops DeepSeek containers then nohup env PORT=8001 ./start.sh >~/logs/lab-load-flash.log",
+    "readme_claims": {
+      "model": "Mia-AiLab/Qwen3.8-Flash-Next-NVFP4 (~99GiB)",
+      "serve": "vLLM TP=1 on DGX Spark, default bind 0.0.0.0:8888",
+      "decode_prose_1stream": "~48.7 tok/s (sparkDash 2026-09-06)",
+      "health_time": "~10-12 min"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+Cg0-c0.75/01_code_edit_python_r1: decode=25.927 (completion_tokens/(wall-ttft)) n=768 ttft=8.3361 wall=37.958s err=None
+Cg0-c0.75/01_code_edit_python_r2: decode=27.46 (completion_tokens/(wall-ttft)) n=768 ttft=4.4643 wall=32.433s err=None
+Cg0-c0.75/02_code_edit_javascript_r1: decode=26.929 (completion_tokens/(wall-ttft)) n=768 ttft=3.7087 wall=32.228s err=None
+Cg0-c0.75/02_code_edit_javascript_r2: decode=27.179 (completion_tokens/(wall-ttft)) n=768 ttft=3.6956 wall=31.952s err=None
+Cg0-c0.75/03_tool_call_openai_tools_r1: decode=15.684 (completion_tokens/(wall-ttft)) n=83 ttft=3.6498 wall=8.942s err=None
+Cg0-c0.75/03_tool_call_openai_tools_r2: decode=15.705 (completion_tokens/(wall-ttft)) n=83 ttft=3.6108 wall=8.896s err=None
+Cg0-c0.75/04_tool_call_plaintext_fallback_r1: decode=18.816 (completion_tokens/(wall-ttft)) n=29 ttft=1.9183 wall=3.46s err=None
+Cg0-c0.75/04_tool_call_plaintext_fallback_r2: decode=19.444 (completion_tokens/(wall-ttft)) n=29 ttft=1.9047 wall=3.396s err=None
+Cg0-c0.75/05_explain_rocm_dspark_r1: decode=15.933 (completion_tokens/(wall-ttft)) n=768 ttft=1.9358 wall=50.136s err=None
+Cg0-c0.75/05_explain_rocm_dspark_r2: decode=15.987 (completion_tokens/(wall-ttft)) n=768 ttft=1.9099 wall=49.948s err=None
+Cg0-c0.75/06_explain_openai_gateway_r1: decode=15.899 (completion_tokens/(wall-ttft)) n=768 ttft=1.6392 wall=49.943s err=None
+Cg0-c0.75/06_explain_openai_gateway_r2: decode=15.941 (completion_tokens/(wall-ttft)) n=768 ttft=1.6181 wall=49.796s err=None
+BENCH SUMMARY tag=Cg0-c0.75 base=http://127.0.0.1:8091 reps=2 mode=stream
+jsonl=$HOME/logs/ds-best-20260925/bench-Cg0-c0.75-20260925_041220.jsonl
+server_decoding_snip=$HOME/logs/ds-best-20260925/bench-Cg0-c0.75-20260925_041220.server-decoding.txt lines=133
+prompt                                  n   wall_s   ttft_s    tok decode_tps src                          err
+------------------------------------------------------------------------------------------------------------------------
+01_code_edit_python                     2   35.195   6.4002  768.0     26.694 completion_tokens/(wall-ttft) errs=0
+02_code_edit_javascript                 2   32.090   3.7022  768.0     27.054 completion_tokens/(wall-ttft) errs=0
+03_tool_call_openai_tools               2    8.919   3.6303   83.0     15.694 completion_tokens/(wall-ttft) errs=0
+04_tool_call_plaintext_fallback         2    3.428   1.9115   29.0     19.130 completion_tokens/(wall-ttft) errs=0
+05_explain_rocm_dspark                  2   50.042   1.9228  768.0     15.960 completion_tokens/(wall-ttft) errs=0
+06_explain_openai_gateway               2   49.870   1.6286  768.0     15.920 completion_tokens/(wall-ttft) errs=0

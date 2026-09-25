@@ -1,0 +1,13 @@
+{
+  "cache_n": 0,
+  "prompt_n": 19,
+  "prompt_ms": 663.056,
+  "prompt_per_token_ms": 34.897684210526315,
+  "prompt_per_second": 28.655196544484927,
+  "predicted_n": 256,
+  "predicted_ms": 12856.759,
+  "predicted_per_token_ms": 50.41866274509804,
+  "predicted_per_second": 19.833925486197572,
+  "draft_n": 234,
+  "draft_n_accepted": 176
+}

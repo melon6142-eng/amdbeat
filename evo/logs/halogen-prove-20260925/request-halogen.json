@@ -1,0 +1,20 @@
+{
+  "model": "halogen-qwen3.8-flash-next",
+  "temperature": 0.3,
+  "max_tokens": 20480,
+  "stream": true,
+  "enable_thinking": false,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a low-poly/cinematic Three.js artist. Output ONLY: (1) one COMPLETE working index.html in a single fenced code block (no prose before it), using classic three.min.js from a CDN that works with file:// (not ES-module-only importmap if avoidable), then (2) the required 5-metric markdown table. No thinking narration.\n"
+    },
+    {
+      "role": "user",
+      "content": "당신은 세계 최고의 인터랙티브 3D 웹 아티스트이자 개발자입니다.\n브라우저에서 단일 `index.html` 파일을 더블클릭하는 것만으로, 마치 한 편의 영화 같은 SF 로켓 발사 시뮬레이션이 풀화면으로 실행되는 완벽한 웹 애플리케이션을 제작해 주세요.\n\n외부 3D 에셋(.gltf/.obj 등)이나 이미지 파일 다운로드 없이, CDN으로 불러온 **Three.js**와 **순수 JavaScript 절차적 지오메트리/셰이더 프로그래밍(Procedural Geometry/Shader Programming)**만을 사용해 완결된 단일 코드를 작성해야 합니다.\n\n---\n\n### 1. 극적인 시네마틱 카메라 연출 (Cinematic Camera System)\n- **로켓 최우선 팔로우 (Active Tracking):** 카메라의 `LookAt` 타겟은 발사 순간부터 우주 궤도 진입까지 **항상 로켓의 상단 1단 분리부**를 강력하게 따라가야 합니다.\n- **다이내믹 줌/거리 조절:**\n  - **T-3s ~ 발사 직후:** 로켓과 지상 발사대를 동시에 보여주는 '로우 앵글 미디엄 샷'으로 시작합니다.\n  - **수직 상승 (고도 0 ~ 대기권 초입):** 로켓이 가속함에 따라 카메라는 로켓을 따라가면서도, 점차 로켓과의 거리를 멀리(`z축` 이동) 하여 로켓이 땅에서 떨어져 하늘로 치솟는 효과가 극적으로 느껴지게 하세요. 지상의 시설물이 급격히 작아지는 연출이 필요합니다.\n  - **대기권 이탈 ~ 우주 진입:** 고도가 충분해지면, 카메라는 로켓 주위를 천천히 공전(Orbital Pan)하며 완전히 칠흑 같은 우주 공간을 배경으로 멀어지는 로켓의 전체 모습을 '시네마틱 롱 샷'으로 담아내야 합니다.\n\n### 2. 디테일한 3D 오브젝트 및 배경 구현\n- **절차적 로켓 디테일 (Procedural Rocket):** 단순 원통형이 아닌, **실제 다단 로켓** 구조를 구현하세요.\n  - 1단, 2단 부스터, 연료 탱크 부분에 그리드 패턴(절차적 텍스처)과 작은 볼트/패널 라인 디테일 추가.\n  - 하단 엔진부에 **멀티 노즐 구조(최소 4개 이상)** 및 연료 배관 구조물 묘사.\n  - 메탈릭 질감과 거칠기(Roughness)를 적용하여 사실적인 반사광 구현.\n- **발사대 주변 시설물 (Launch Complex):** 지면 베이스 위에 다음과 같은 시설물을 메쉬로 배치하세요.\n  - 로켓을 지지하는 복잡한 트러스 구조의 **모바일 론처(Mobile Launcher) 타워** 및 크레인 디테일.\n  - 4개의 거대한 발사대 지지대 및 연료 저장 탱크(원통형) 군락.\n- **배경 환경의 극적 전환:**\n  - **지상:** 텍스처링된 지평선, 파란 하늘, 그리고 로켓 하단에서 뿜어져 나와 지면을 뒤덮는 **수천 개의 파티클 연기 및 볼류메트릭 불꽃(Particle Smoke/Fire)** 구현.\n  - **상승 시 대기 변화:** 고도에 따라 하늘색이 파랑 -> 남색 -> 짙은 보라색으로 실시간 그라데이션 보간(Lerp)되며 대기의 두께가 변하는 느낌을 구현하세요.\n  - **우주:** 완전히 칠흑 같은 배경으로 전환되며, **수만 개의 별 파티클**이 무한한 공간감을 연출합니다.\n\n### 3. 발사 시퀀스 및 사운드 시스템\n- **UI 컨트롤 & HUD:** 화면 좌측 상단에 미래형 디자인의 HUD(글래스모피즘 스타일)를 구현하세요.\n  - \"LAUNCH SEQUENCE START\" 버튼\n  - 실시간 고도계(Altitude, unit:km), 상승 속도(Speed, unit:mach), 경과 시간 표시\n- **사운드 (Web Audio API):** 외부 오디오 파일 없이, 화이트 노이즈와 오실레이터를 조합하여 발사 시의 거대한 로켓 엔진 굉음(폭발음/럼블)을 실시간 합성해 재생하세요. 상승 시 굉음의 피치를 조절하여 속도감을 더하세요.\n\n---\n\n### 4. 출력 및 벤치마크 리포트 제약 사항\n1. **코드 출력:** 다른 설명이나 주석 생략 없이, 브라우저에서 바로 실행 가능한 완결된 `index.html` 단일 코드 블록을 먼저 출력하세요.\n2. **벤치마크 메트릭 작성:** 코드 블록 바로 아래에, 이번 요청 처리에 대한 다음 5가지 성능 데이터를 표(Markdown Table) 형식으로 반드시 명시해 주세요. (로컬 환경/측정 시스템의 경우 실제 측정값, 웹 UI/API의 경우 제공되는 세션 통계 또는 추정치 기재)\n   - **프로젝트 진행 소요 시간 (Wall Clock Time):** 프롬프트 전송부터 전체 출력 완료까지의 총 소요 시간 (초/분)\n   - **총 토큰 소요 (Total Tokens):** 입력 + 출력 토큰 합계\n   - **프리필 토큰 (Prompt/Prefill Tokens):** 시스템/사용자 입력 프롬프트 토큰 수 및 처리 시간(초당 토큰 처리량)\n   - **디코드 토큰 (Completion/Decode Tokens):** 생성된 코드 및 텍스트의 총 출력 토큰 수\n   - **토큰 생성 속도 (Generation Speed):** 디코드 단계의 초당 토큰 생성 속도 (tokens/sec)\n"
+    }
+  ]
+}
