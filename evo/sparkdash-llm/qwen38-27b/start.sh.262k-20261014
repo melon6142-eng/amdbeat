@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# sparkDash launcher: qwen3.8-27b (luce_server, R9700 hip:0) on :8216. Stays alive while server runs.
+cd "$HOME/lucebox" || exit 1
+if ! pgrep -x luce_server >/dev/null; then
+  exec ./server/build-hip/luce_server "$HOME/models/gguf/qwen38-27b/Qwen3.8-27B-UD-IQ4_XS.gguf" --draft "$HOME/models/gguf/qwen38-27b/qwen38-dflash2-q8_0.gguf" --draft-block-size 16 --max-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 --target-device hip:0 --draft-device hip:0 --host 0.0.0.0 --port 8216
+fi
+echo "luce_server already running"; while pgrep -x luce_server >/dev/null; do sleep 15; done
