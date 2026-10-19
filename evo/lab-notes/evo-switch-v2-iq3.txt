@@ -1,0 +1,51 @@
+EVO switch plan (prepared 2026-10-19 13:05 CST, NOT executed)
+Target: 8217 = halogen-flash-server 0.18.11 + qwen38-flash-next-v2.hgn (iGPU)   8216 = Strata 0.1.40 IQ3_XXS, resident budget 9 (R9700)
+
+Run:   ~/bin/evo-switch-v2-iq3.sh --check     (read-only precheck, safe anytime)
+       ~/bin/evo-switch-v2-iq3.sh --go        (does the switch; log ~/logs/evo-switch-v2-iq3.log)
+       ~/bin/evo-switch-v2-iq3.sh --rollback  (0.18.4 + w4b, Strata Coder IQ1_M)
+Downtime: both ports, roughly 3-8 min (v2 62 GiB cold read + pin, then Strata load).
+
+--go steps
+ 0 precheck: IQ3 shard1 .done, v2.hgn.done, ngram.hgn.done, image 0.18.11 + 0.18.4-rollback tag, halogen-v2.env, v2 json, *.next launchers
+ 1 build pack ~/src/Strata-data/packs/iq3_xxs if missing (iq_pack.py + strata_tokenizer.py)
+ 2 back up start.sh/stop.sh/strata-8216.sh (*.pre-v2iq3-<ts>)
+ 3 stop 8216 with the CURRENT ~/sparkdash-llm/qwen38-27b/stop.sh, verify gone
+   install new generic launchers: start.sh/stop.sh/strata-8216.sh read CFG from ~/strata-8216.conf;
+   pattern "serve.server --engine strata --config strata-.*-r9700-8216.*[.]json"; stop.sh kills server PID + its engine child PIDs (no pattern on engine)
+ 4 podman inspect halogen -> ~/backups/halogen-0184-w4b-<ts>.inspect.json, halogen.env copy; podman stop -t 60; rename to halogen-w4b-0184-<ts> (kept for rollback, name in ~/backups/evo-switch.state)
+ 5 podman run (identical flags, name halogen, -p 8217:8731, HIP_VISIBLE_DEVICES=1, memlock unlimited, models ro) image 0.18.11 --env-file ~/halogen-v2.env
+   halogen-v2.env = halogen.env minus HALOGEN_IMAGE_VERSION=0.18.4 (would mislabel the new image), CHECKPOINT=/models/qwen38-flash-next-v2.hgn,
+   + HALOGEN_MODEL_ID=halogen-qwen3.8-flash-next (same as default; pinned so clients see the same id).
+   ngram table: v2 finds qwen38-flash-next-ngram.hgn beside the checkpoint automatically (docs: v2 = one file + lookup table, no sidecar). No HALOGEN_CK_OVERLAY (w4b-only).
+   Unchanged: CTX 262144, KV_SLOTS 4, pool default 524288 (2xCTX), PROMPT_CACHE 2, MAX_TOK 16384, PREFILL_CHUNK 32768, ATTN_FA 64, MATMUL_*.
+   wait /health (10 min), print /v1/models, smoke completion, memory lines from podman logs. Fail -> automatic rollback.
+ 6 echo CFG=strata-iq3_xxs-r9700-8216-v2.json > ~/strata-8216.conf; start via sparkDash start.sh (setsid); wait /v1/models (10 min); smoke.
+   8216 model id becomes strata-qwen3.8-flash-next-iq3_xxs (Strata does not reject other model names in requests, so clients keep working;
+   to keep the old id, set "model_name" in the v2 json to strata-qwen3.8-flash-next-coder-iq1_m).
+ If 8216 fails, 8217 stays on v2; fix, or --rollback.
+
+Memory (v2): halogen ~62 GiB locked weights + 14.4 GiB KV pool. Budget 16 for Strata. Optional: HALOGEN_KV_POOL_POSITIONS=262144 in halogen-v2.env -> Strata budget 18.
+ Optional later (0.18.9+ only): HALOGEN_KV8=1 halves the pool (8.2 vs 14.4 GiB).
+
+Rollback (--rollback): stop 8216 -> remove new halogen container -> rename halogen-w4b-0184-<ts> back to halogen and podman start
+ (if missing: podman run same flags with localhost/halogen-flash-server:0.18.4-rollback + ~/halogen.env) -> CFG=strata-coder-iq1_m-r9700-8216.json -> start.sh.
+ Manual: old launchers are *.pre-v2iq3-<ts>.
+
+flash-next/stop.sh risk (NOT applied): ~/sparkdash-llm/flash-next/stop.sh runs pkill -TERM -f "serve.server --engine strata",
+ which would also kill the 8216 Strata. 8217 is now halogen in podman, so replace its body with:
+     podman stop -t 60 halogen
+ and start.sh with:  podman start halogen && until curl -sf localhost:8217/health >/dev/null; do sleep 5; done; while [ "$(podman inspect -f {{.State.Running}} halogen)" = true ]; do sleep 15; done
+ (or at least narrow the pattern to "serve.server --engine strata --config strata-.*-8217").
+Also: never pkill -f from an ssh one-liner whose own command line contains the pattern (it kills the ssh shell); use PIDs.
+
+UPDATE 13:15 CST: image 0.18.11 (not 0.18.7), HALOGEN_KV8=1 added to ~/halogen-v2.env, Strata budget 16 -> 9.
+ KV8 (0.18.9+): 1 = 8-bit KV keys/values. Pool 524288 positions: ~8.2 GiB instead of 14.4 (about 21 GB instead of 27 on the GPU in all).
+   Prefill unchanged; decode 0.2-0.6% slower on short contexts, 1.7-1.9% slower at 32k. Perplexity -0.3..+0.5%, retrieval at 128k/250k same as bf16.
+   Not combinable with HALOGEN_COMPOSABLE_CONTEXT=1 (not set here). Prompt-cache files on disk (HALOGEN_CACHE_DIR, not set) are format-specific.
+   /health reports "kv_cache":"int8". ctx 262144, 4 slots, PROMPT_CACHE=2, v2: no stated interaction.
+ Memory with v2 + KV8 (GiB, machine reports 124.45): halogen 62.1 pinned weights + ~19.6 GPU (pool 8.2 + working ~10.8/11.4) + ~3.6 RAM (prompt cache etc.) = ~85.3
+   OS/kernel/other ~4.0; Strata IQ3 ~10.7 + budget (5.7 runtime RAM measured on Coder, ~2.5 dense est., ~2.5 pinned KV for 2x131072 with kv-resident 32768)
+   free file cache (for the 47.7 GiB n-gram table) = 124.45 - 85.3 - 4.0 - 10.7 - budget = ~24.4 - budget  -> budget 9 leaves ~15.4 GiB.
+   Previous 16 would leave ~8.5 GiB. Optional: HALOGEN_KV_POOL_POSITIONS=262144 (still ctx 262144 for one request; ~4.1 GiB less) -> budget 13.
+ Verify after the switch: free -g, "memory:" lines in podman logs halogen, Strata resident line in ~/logs/strata-8216.log.

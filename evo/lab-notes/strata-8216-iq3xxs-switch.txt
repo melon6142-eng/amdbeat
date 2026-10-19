@@ -1,0 +1,9 @@
+PREPARED, NOT APPLIED (2026-10-19). Switch 8216 from Coder IQ1_M to IQ3_XXS after the download has a .done marker:
+ 1. pack (seconds, no download):  cd ~/src/strata-0140 && ./.venv/bin/python tools/iq_pack.py --gguf ~/src/Strata-data/models/IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf --out ~/src/Strata-data/packs/iq3_xxs
+    && ./.venv/bin/python tools/strata_tokenizer.py --gguf <same shard1> --out ~/src/Strata-data/packs/iq3_xxs   (if tokenizer/ missing)
+ 2. ~/sparkdash-llm/qwen38-27b/stop.sh
+ 3. in ~/strata-8216.sh AND the PAT/pgrep lines of ~/sparkdash-llm/qwen38-27b/{start,stop}.sh: replace
+    strata-coder-iq1_m-r9700-8216.json -> strata-iq3_xxs-r9700-8216-w4b.json (or -v2.json if 8217 is on halogen v2)
+    (stop.sh also matches "--batch 4 --resident-budget-gib 12" -> change to the new flags)
+ 4. start via sparkdash launcher; watch MemAvailable, 8217 speed, "resident RAM: ... blob reads from the file" in ~/logs/strata-8216.log
+ Rollback: put the coder config name back (strata-coder-iq1_m-r9700-8216.json) and restart.
