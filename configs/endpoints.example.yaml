@@ -1,5 +1,5 @@
-# Copy to endpoints.yaml and edit. NEVER point dry-run at lab Sparks/EVO by default.
-# Real endpoints require explicit user/lab-ops approval when GPU is shared.
+# Copy to endpoints.yaml and edit. NEVER point dry-run at shared lab GPUs by default.
+# Real endpoints require explicit approval when GPU capacity is shared.
 
 endpoints:
   mock:
@@ -9,21 +9,21 @@ endpoints:
     notes: "Local mock OpenAI-compatible server for dry-run"
 
   # --- placeholders (commented; do not enable without approval) ---
-  # dsv41_spark_tp2:
-  #   base_url: "http://SPARK1_HOST:8000/v1"
-  #   model: "dsv41"
+  # spark_tp2:
+  #   base_url: "http://<host>:8000/v1"
+  #   model: "<model-id>"
   #   api_key: null
   #   max_concurrent: 1
-  #   notes: "Shared Sparks TP2; max 2 concurrent lab-wide; avoid >100k prompts"
+  #   notes: "Shared multi-GPU endpoint; keep concurrency low"
   #
-  # evo_8216:
-  #   base_url: "http://EVO_HOST:8216/v1"
-  #   model: "strata-qwen3.8-flash-next-iq3_xxs"
+  # amd_r9700:
+  #   base_url: "http://<host>:${PORT:-8216}/v1"
+  #   model: "qwen3.8-27b-ud-q6k"
   #   api_key: null
   #   max_concurrent: 1
   #
-  # evo_8217:
-  #   base_url: "http://EVO_HOST:8217/v1"
-  #   model: "halogen-qwen3.8-flash-next"
+  # amd_igpu:
+  #   base_url: "http://<host>:${PORT:-8217}/v1"
+  #   model: "<igpu-model-id>"
   #   api_key: null
   #   max_concurrent: 1

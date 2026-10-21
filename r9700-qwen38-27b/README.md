@@ -1,6 +1,6 @@
 # R9700 × Qwen3.8-27B — max-efficiency GGUF recipe
 
-**Goal:** Run Qwen3.8-27B on a single AMD Radeon **R9700 32GB** (EVO `EVO_HOST`) with the best **quality × speed** product.  
+**Goal:** Run Qwen3.8-27B on a single AMD Radeon **R9700 32GB** with the best **quality × speed** product.  
 “Efficiency” means not the smallest file, but the highest bpw×speed under **full GPU offload + usable context (≥32k)**.
 
 **Engine:** llama.cpp (`qwen35` / Gated DeltaNet) · GGUF · ROCm and/or Vulkan.  

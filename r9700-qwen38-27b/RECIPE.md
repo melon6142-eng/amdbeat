@@ -76,7 +76,7 @@ aria2c -x16 -s16 -c \
   "https://hf-mirror.com/unsloth/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-UD-Q6_K.gguf"
 ```
 
-Disk: EVO ~320G free — P0+P1 ≈ 43 GiB; leave room for Q5/Q4 pair if sweeping.
+Disk: leave ~50+ GiB free — P0+P1 ≈ 43 GiB; leave room for Q5/Q4 pair if sweeping.
 
 ## llama.cpp serve flags (AMD)
 
@@ -104,7 +104,7 @@ $LLAMA_SERVER \
 | `-fa on` | flash-attn | ROCm/Vulkan support varies by build; if unsupported, server may ignore or error — **TODO measure** |
 | `--jinja` | Qwen chat template | required for thinking/tools template |
 | `--mmap` | map weights from disk | lowers RSS; first token may be slower cold |
-| `-np 1` | single slot | matches lab-ops “1 request” habit on EVO ports |
+| `-np 1` | single slot | prefer one concurrent request on 32GB |
 | `--alias` | OpenAI model id | for `bench_client.py` |
 
 ### Speculative (optional)
@@ -154,17 +154,17 @@ All are **templates** with placeholders; they refuse to run if `EVO_CONFIRM=1` i
 ## Smoke + bench hooks
 
 ```bash
-# after server up on EVO (from box or any host that can reach EVO_HOST)
-cd /workspace/quant-lab
+# after server is up (from any host that can reach <host>)
+cd /path/to/amdbeat
 . .venv/bin/activate
 
 # smoke
-curl -s http://EVO_HOST:8216/v1/models | head
+curl -s http://<host>:${PORT:-8216}/v1/models | head
 
 # bench (same flags for both competitors — swap model alias/endpoint only)
 python scripts/bench_client.py \
   --config configs/bench.yaml \
-  --endpoint http://EVO_HOST:8216/v1 \
+  --endpoint http://<host>:${PORT:-8216}/v1 \
   --model qwen38-27b-ud-q6k \
   --out results/r9700_ud_q6k.json
 ```
