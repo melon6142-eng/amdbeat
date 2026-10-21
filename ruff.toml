@@ -1,0 +1,14 @@
+# Lenient lint config for AMDBeat CI — prefer signal over noise.
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+  "E501",  # line length — docs/strings often exceed
+  "E741",  # ambiguous names in math (l, O)
+]
+
+[lint.per-file-ignores]
+"scripts/*" = ["E402"]  # sys.path bootstrap before local imports
+"tests/*" = ["E402"]

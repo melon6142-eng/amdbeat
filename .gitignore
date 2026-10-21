@@ -13,3 +13,5 @@
 .env.*
 __pycache__/
 results/runs/
+.venv/
+results/pytest_dryrun*
