@@ -5,10 +5,11 @@ Design notes / limitations
 --------------------------
 1. True KL(P_ref || P_cand) needs the full next-token distribution. OpenAI-style
    APIs only return top-k logprobs (often k<=20). We therefore report:
-   - top1 agreement
-   - top-k set overlap
-   - partial KL over the union of returned tokens, with mass outside top-k
-     treated as a single residual bucket (biased low/high depending on k).
+   - top-1 agreement
+   - top-k set Jaccard overlap
+   - **partial KL (top-k + tail bucket)** — a *lower bound* on full-vocab KL
+     (see ``partial_kl_topk_tail``). Full-vocab KL must come from
+     ``llama-perplexity --kl-divergence`` (or equivalent), not from this script.
 2. Chat templates may differ across engines (vLLM / SGLang / llama.cpp /
    ExLlamaV3). Prefer /v1/completions with a raw prompt when both servers
    support it; this script uses chat completions for maximum compatibility.
@@ -23,6 +24,25 @@ Design notes / limitations
    when weights are local; see turboderp EXL3 tooling:
    https://github.com/turboderp-org/exllamav3
    This HTTP approach is for cross-lab serving comparisons when only APIs exist.
+
+Partial KL method (lower-bound approximation)
+---------------------------------------------
+Returned top-k logprobs are converted with ``exp(logprob)`` and are **not**
+renormalized over the top-k alone (renormalization drops out-of-top-k mass and
+distorts KL).
+
+Let I = intersection of the two top-k token sets. Each side keeps its raw
+probability on tokens in I; all remaining probability (true tail + tokens only
+on that side's top-k) is collapsed into a single ``__tail__`` residual bucket:
+``p_tail = max(0, 1 - sum_{t in I} p_raw[t])`` (same for q).
+
+KL is then computed on the coarse support ``I ∪ {__tail__}``. By the KL
+coarsening / data-processing inequality, merging events can only *decrease*
+KL, so this value is a **lower bound** on the KL that would be obtained from
+the finer top-k∪tail partition, and likewise a lower bound on full-vocab KL
+when the true distributions put mass on finer distinctions. Tokens present in
+one top-k but not the other are absorbed into that side's tail bucket rather
+than given an ad-hoc floor.
 
 Deps: pyyaml, httpx|requests.
 """
@@ -40,6 +60,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from bench_client import chat_once, load_yaml  # noqa: E402
 
+TAIL_KEY = "__tail__"
+_KL_EPS = 1e-12
+
 
 def extract_top(logprobs_obj: dict | None) -> list[dict]:
     if not logprobs_obj:
@@ -56,7 +79,29 @@ def extract_top(logprobs_obj: dict | None) -> list[dict]:
     return [{"token": first.get("token"), "logprob": float(first.get("logprob", float("-inf")))}]
 
 
+def raw_probs_from_logprobs(items: list[dict]) -> dict[str, float]:
+    """Convert logprobs to raw probabilities without renormalizing over top-k.
+
+    OpenAI-style top_logprobs are absolute log-probabilities under the model
+    distribution, so ``exp(logprob)`` already lies in (0, 1] and the leftover
+    mass belongs in the explicit tail bucket — do **not** softmax/renorm here.
+    """
+    out: dict[str, float] = {}
+    for x in items:
+        tok = x.get("token")
+        if tok is None:
+            continue
+        lp = float(x["logprob"])
+        # clamp extreme negatives for numerical safety; keep mass honest
+        out[str(tok)] = math.exp(lp) if lp > -700 else 0.0
+    return out
+
+
 def softmax_from_logprobs(items: list[dict]) -> dict[str, float]:
+    """Deprecated helper kept for callers/tests that expect a renormed map.
+
+    Prefer ``raw_probs_from_logprobs`` + ``partial_kl_topk_tail``.
+    """
     if not items:
         return {}
     m = max(x["logprob"] for x in items)
@@ -65,25 +110,63 @@ def softmax_from_logprobs(items: list[dict]) -> dict[str, float]:
     return {t: v / z for t, v in exps}
 
 
-def partial_kl(p: dict[str, float], q: dict[str, float], residual: float = 1e-9) -> float:
-    """KL over shared support; missing mass -> residual bucket."""
-    keys = set(p) | set(q)
-    # renormalize with residual for missing
-    def full(d: dict[str, float]) -> dict[str, float]:
-        s = sum(d.values())
-        out = {k: d.get(k, 0.0) for k in keys}
-        miss = max(0.0, 1.0 - s)
-        out["__residual__"] = miss + residual
-        z = sum(out.values())
-        return {k: v / z for k, v in out.items()}
+def partial_kl_topk_tail(
+    p_raw: dict[str, float],
+    q_raw: dict[str, float],
+    eps: float = _KL_EPS,
+) -> dict[str, Any]:
+    """Lower-bound partial KL(P||Q) over intersection(top-k) + tail bucket.
 
-    P, Q = full(p), full(q)
+    See module docstring for the coarsening argument. Returns a dict with
+    ``kl``, ``p_tail``, ``q_tail``, ``intersection_size``, and ``method``.
+    """
+    if not p_raw and not q_raw:
+        return {
+            "kl": None,
+            "p_tail": None,
+            "q_tail": None,
+            "intersection_size": 0,
+            "method": "topk_intersection_plus_tail_lower_bound",
+        }
+
+    keys_p = set(p_raw)
+    keys_q = set(q_raw)
+    intersection = keys_p & keys_q
+
+    p_shared = sum(p_raw[t] for t in intersection)
+    q_shared = sum(q_raw[t] for t in intersection)
+    p_tail = max(0.0, 1.0 - p_shared)
+    q_tail = max(0.0, 1.0 - q_shared)
+
     kl = 0.0
-    for k, pv in P.items():
-        qv = max(Q.get(k, residual), residual)
-        if pv > 0:
-            kl += pv * math.log(pv / qv)
-    return kl
+    for t in intersection:
+        pt = p_raw[t]
+        qt = max(q_raw[t], eps)
+        if pt > 0.0:
+            kl += pt * math.log(pt / qt)
+
+    if p_tail > 0.0:
+        kl += p_tail * math.log(p_tail / max(q_tail, eps))
+
+    return {
+        "kl": kl,
+        "p_tail": p_tail,
+        "q_tail": q_tail,
+        "intersection_size": len(intersection),
+        "method": "topk_intersection_plus_tail_lower_bound",
+    }
+
+
+def partial_kl(p: dict[str, float], q: dict[str, float], residual: float = 1e-9) -> float:
+    """Backward-compatible wrapper; prefers raw maps + tail lower-bound.
+
+    ``residual`` is accepted for CLI/test compatibility but ignored; the tail
+    bucket is derived from ``1 - sum(shared)``.
+    """
+    del residual  # unused; kept for signature compatibility
+    result = partial_kl_topk_tail(p, q)
+    val = result["kl"]
+    return float(val) if val is not None else float("nan")
 
 
 def compare_prompts(ref_ep: dict, cand_ep: dict, prompts: list[dict], k: int, timeout: float) -> dict:
@@ -114,13 +197,20 @@ def compare_prompts(ref_ep: dict, cand_ep: dict, prompts: list[dict], k: int, ti
         )
         rt = extract_top(ref.get("logprobs"))
         ct = extract_top(cand.get("logprobs"))
-        p = softmax_from_logprobs(rt)
-        q = softmax_from_logprobs(ct)
+        p = raw_probs_from_logprobs(rt)
+        q = raw_probs_from_logprobs(ct)
         top1_ref = rt[0]["token"] if rt else None
         top1_cand = ct[0]["token"] if ct else None
         set_ref = {x["token"] for x in rt}
         set_cand = {x["token"] for x in ct}
         overlap = len(set_ref & set_cand) / max(1, len(set_ref | set_cand))
+        kl_info = partial_kl_topk_tail(p, q) if (p or q) else {
+            "kl": None,
+            "p_tail": None,
+            "q_tail": None,
+            "intersection_size": 0,
+            "method": "topk_intersection_plus_tail_lower_bound",
+        }
         rows.append(
             {
                 "id": item.get("id"),
@@ -128,7 +218,10 @@ def compare_prompts(ref_ep: dict, cand_ep: dict, prompts: list[dict], k: int, ti
                 "top1_ref": top1_ref,
                 "top1_cand": top1_cand,
                 "topk_jaccard": overlap,
-                "partial_kl": partial_kl(p, q) if p and q else None,
+                "partial_kl": kl_info["kl"],
+                "partial_kl_method": kl_info["method"],
+                "p_tail": kl_info["p_tail"],
+                "q_tail": kl_info["q_tail"],
                 "ref_has_logprobs": bool(rt),
                 "cand_has_logprobs": bool(ct),
             }
@@ -139,12 +232,22 @@ def compare_prompts(ref_ep: dict, cand_ep: dict, prompts: list[dict], k: int, ti
         "n": len(rows),
         "top1_agreement": (sum(agrees) / len(agrees)) if agrees else None,
         "mean_partial_kl": (sum(kls) / len(kls)) if kls else None,
+        "partial_kl_note": (
+            "partial KL (top-k + tail bucket) is a lower-bound approximation; "
+            "full-vocab KL requires llama-perplexity --kl-divergence"
+        ),
         "rows": rows,
     }
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(
+        description=(
+            "Partial KL (top-k + tail bucket, lower bound) and top-1 agreement "
+            "between two OpenAI-compatible endpoints. Full-vocab KL: use "
+            "llama-perplexity --kl-divergence."
+        )
+    )
     ap.add_argument("--endpoints", default=str(ROOT / "configs" / "endpoints.example.yaml"))
     ap.add_argument("--ref", default="mock")
     ap.add_argument("--cand", default="mock")
@@ -176,7 +279,12 @@ def main() -> None:
         "cand": {"base_url": cand_ep.get("base_url"), "model": cand_ep.get("model")},
         "k": args.k,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "limitations": "partial KL over top-k only; see module docstring",
+        "limitations": (
+            "partial KL (top-k + tail bucket) is a lower-bound approximation via "
+            "intersection coarsening; full-vocab KL must come from "
+            "llama-perplexity --kl-divergence"
+        ),
+        "method": "topk_intersection_plus_tail_lower_bound",
     }
     out = Path(args.out) if args.out else ROOT / "results" / "kl_compare_dryrun.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -187,6 +295,7 @@ def main() -> None:
             {
                 "top1_agreement": report["top1_agreement"],
                 "mean_partial_kl": report["mean_partial_kl"],
+                "partial_kl_note": report["partial_kl_note"],
                 "n": report["n"],
             },
             indent=2,
