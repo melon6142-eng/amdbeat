@@ -1,10 +1,10 @@
-{"id":"kl_01","suite":"kl","prompt":"The capital of France is","max_tokens":8}
-{"id":"kl_02","suite":"kl","prompt":"In Python, list comprehension is written as","max_tokens":16}
-{"id":"kl_03","suite":"kl","prompt":"Explain Kirchhoff's current law in one sentence:","max_tokens":48}
-{"id":"kl_04","suite":"kl","prompt":"def fibonacci(n):\n    if n <= 1:\n        return n\n    return","max_tokens":24}
-{"id":"kl_05","suite":"kl","prompt":"Translate to Korean: Open-source quantization labs compete on quality and speed.","max_tokens":64}
-{"id":"gsm_01","suite":"gsm8k_subset","prompt":"Janet has 3 apples. She buys 2 more bags with 4 apples each. How many apples does she have? Show the number only at the end.","max_tokens":128,"answer":"11"}
-{"id":"gsm_02","suite":"gsm8k_subset","prompt":"A train travels 60 km in 1.5 hours. What is its average speed in km/h? Number only at the end.","max_tokens":64,"answer":"40"}
-{"id":"humaneval_01","suite":"humaneval_subset","prompt":"Write a Python function `is_palindrome(s: str) -> bool` that returns True if s reads the same forwards and backwards, ignoring case and non-alphanumeric characters.","max_tokens":256}
-{"id":"ifeval_01","suite":"ifeval_subset","prompt":"Reply with exactly three bullet points, each starting with a dash and a space, listing primary colors. No other text.","max_tokens":64}
-{"id":"needle_01","suite":"long_needle","prompt":"Context filler: The quick brown fox jumps over the lazy dog. " ,"max_tokens":32,"note":"bench_client expands filler to target depth and inserts a needle key"}
+{"id": "kl_01", "suite": "kl", "prompt": "The capital of France is", "max_tokens": 8}
+{"id": "kl_02", "suite": "kl", "prompt": "In Python, list comprehension is written as", "max_tokens": 16}
+{"id": "kl_03", "suite": "kl", "prompt": "Explain Kirchhoff's current law in one sentence:", "max_tokens": 48}
+{"id": "kl_04", "suite": "kl", "prompt": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return", "max_tokens": 24}
+{"id": "kl_05", "suite": "kl", "prompt": "Translate to Korean: Open-source quantization labs compete on quality and speed.", "max_tokens": 64}
+{"id": "gsm_01", "suite": "gsm8k_subset", "prompt": "Janet has 3 apples. She buys 2 more bags with 4 apples each. How many apples does she have? Show the number only at the end.", "max_tokens": 128, "answer": "11"}
+{"id": "gsm_02", "suite": "gsm8k_subset", "prompt": "A train travels 60 km in 1.5 hours. What is its average speed in km/h? Number only at the end.", "max_tokens": 64, "answer": "40"}
+{"id": "humaneval_01", "suite": "humaneval_subset", "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if s reads the same forwards and backwards, ignoring case and non-alphanumeric characters.", "max_tokens": 256, "entry_point": "is_palindrome", "test": "def check(candidate):\n    assert candidate('A man, a plan, a canal: Panama') is True\n    assert candidate('race a car') is False\n    assert candidate('') is True\n    assert candidate('No lemon, no melon') is True\n    assert candidate('hello') is False\n"}
+{"id": "ifeval_01", "suite": "ifeval_subset", "prompt": "Reply with exactly three bullet points, each starting with a dash and a space, listing primary colors. No other text.", "max_tokens": 64}
+{"id": "needle_01", "suite": "long_needle", "prompt": "Context filler: The quick brown fox jumps over the lazy dog. ", "max_tokens": 32, "note": "bench_client expands filler to target depth and inserts a needle key"}
