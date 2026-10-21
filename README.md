@@ -4,22 +4,16 @@ AMDBeat publishes **measured** quantization + serving recipes for AMD GPUs, star
 
 ## Headline results — Qwen3.8-27B on R9700 (2026-10-21, Asia/Shanghai)
 
-llama.cpp **b10698**, `-ngl 99 -fa 1`, KV **q8_0**, `llama-bench` r3.
+**Live (ROCm master):** unsloth **UD-Q4_K_XL + MTP Q4_0** n-max 3, llama.cpp **master** HIP gfx1201, `-b/-ub 2048`, KV f16, ctx 65536. Alias `qwen3.8-27b-ud-q4kxl-mtp`.
 
-| Quant | Backend | pp512 | pp8192 | tg128 | VRAM |
-|---|---|---|---|---|---|
-| unsloth UD-Q6_K | **Vulkan** (unsloth mix b6e334953) | **872.17** | **798.41** | **24.63** | ~21.06 GiB |
-| unsloth UD-Q6_K | ROCm 7.2.1 HIP gfx1201 | 864.42 | 780.19 | 23.65 | - |
-| bartowski Q6_K | Vulkan | 871.79 | 799.26 | 22.98 | 22.21 GiB file |
+| Metric | Value |
+|---|---|
+| Prefill pp512 | **~1294** tok/s (+46% vs Vulkan mix) |
+| Decode (MTP) | code **67.6** / prose **47.2** tok/s |
+| VRAM | ~25.4 GiB |
+| Serve script | [`evo/bin/serve-qwen38-27b-ud-q6k.sh`](evo/bin/serve-qwen38-27b-ud-q6k.sh) |
 
-**MTP** (Vulkan, `mtp-Q4_0` draft, server smoke):
-
-| spec-draft-n-max | code tok/s (accept) | prose tok/s (accept) | VRAM |
-|---|---|---|---|
-| **3** (live) | **58.4** (0.758) | **41.2** (0.434) | ~24.2 GiB |
-| 4 | 55.9 | 38.4 | - |
-
-On this card and build, **Vulkan edged out ROCm**; unsloth **UD-Q6_K + MTP n-max 3** is the live default. Full notes: [`r9700-qwen38-27b/results/RESULTS-2026-10-21.md`](r9700-qwen38-27b/results/RESULTS-2026-10-21.md).
+Earlier same-day UD-Q6_K Vulkan/ROCm llama-bench table and MTP smoke: [`RESULTS-2026-10-21.md`](r9700-qwen38-27b/results/RESULTS-2026-10-21.md). Live switch details: [`RESULTS-2026-10-21-rocm-live.md`](r9700-qwen38-27b/results/RESULTS-2026-10-21-rocm-live.md).
 
 ## Reproduce
 
@@ -36,21 +30,23 @@ $LLAMA_BENCH \
 # ROCm: build a HIP binary and omit --device / set HIP_VISIBLE_DEVICES=0
 ```
 
-### llama-server (MTP live config)
+### llama-server (MTP live config — ROCm master)
 
 ```bash
+# HIP gfx1201 build of llama.cpp master; HIP_VISIBLE_DEVICES=0
 $LLAMA_SERVER \
-  -m "$MODELS_DIR/Qwen3.8-27B-UD-Q6_K.gguf" \
+  -m "$MODELS_DIR/Qwen3.8-27B-UD-Q4_K_XL.gguf" \
   --host 0.0.0.0 --port "${PORT:-8216}" \
-  -a qwen3.8-27b-ud-q6k \
-  -ngl 99 -fa on -c 32768 \
-  -ctk q8_0 -ctv q8_0 --jinja \
-  --device Vulkan0 \
+  -a qwen3.8-27b-ud-q4kxl-mtp \
+  -ngl 99 -fa on -c 65536 \
+  -b 2048 -ub 2048 -ctk f16 -ctv f16 --jinja \
   --spec-type draft-mtp \
   -md "$MODELS_DIR/mtp-Qwen3.8-27B-Q4_0.gguf" \
-  -devd Vulkan0 -ngld all \
+  -ngld all \
   --spec-draft-n-max 3
 ```
+
+Lab host wrapper: `evo/bin/serve-qwen38-27b-ud-q6k.sh` (Vulkan rollback: `.bak-vulkan-20261021`).
 
 Recipe details and quant ladder: [`r9700-qwen38-27b/RECIPE.md`](r9700-qwen38-27b/RECIPE.md).
 
@@ -83,7 +79,7 @@ HumanEval pass@1 executes model code in a timed subprocess — **unsafe outside 
 - `scripts/` — `bench_client.py`, `kl_compare.py`, mock server
 - `tests/` — pytest (KL math, HumanEval executor, dry-run smoke)
 - `PIPELINE.md` / `FIRST_TARGET.md` — how we pick the next model
-- `evo/` — archived run logs (scrubbed for public release)
+- `evo/` — lab host scripts + archived logs (scrubbed); live 8216 serve under `evo/bin/`; R9700 push sweeps under `evo/r9700-push/`
 
 ## Roadmap
 

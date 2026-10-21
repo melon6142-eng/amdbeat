@@ -2,7 +2,7 @@
 # 8216 load-time test. Assumes 8216 down. Leaves 8216 DOWN (run-kl restores).
 V=$HOME/bin/vmtouch; S=$HOME/bin/serve-qwen38-27b-ud-q6k.sh
 PF=$HOME/logs/serve-qwen38-27b-ud-q6k.pid
-F1=$MODELS_DIR/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q6_K.gguf; F2=$MODELS_DIR/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf
+F1=${MODELS_DIR:-$HOME/models}/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q6_K.gguf; F2=${MODELS_DIR:-$HOME/models}/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf
 O=$HOME/kl-eval/results/loadtest.txt
 avail(){ awk "/MemAvailable/{printf \"%.1f\", \$2/1048576}" /proc/meminfo; }
 c8217(){ echo "8217=$(curl -s -o /dev/null -w %{http_code} --max-time 3 localhost:8217/v1/models)"; }

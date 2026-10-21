@@ -1,0 +1,22 @@
+#!/bin/bash
+# Best R9700 dense 27B (2026-10-21): UD-Q4_K_XL + MTP n=3, Vulkan0, KV f16, ub=1024
+set -euo pipefail
+BIN=$HOME/opt/unsloth-llama-b10698-mix-vulkan
+MODEL=${MODELS_DIR:-$HOME/models}/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q4_K_XL.gguf
+MTP=${MODELS_DIR:-$HOME/models}/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf
+LOG=$HOME/logs/serve-qwen38-27b-ud-q6k.log
+PIDF=$HOME/logs/serve-qwen38-27b-ud-q6k.pid
+export LD_LIBRARY_PATH="$BIN:${LD_LIBRARY_PATH:-}"
+if ss -tnl sport = :8216 2>/dev/null | grep -q 8216; then echo "port busy"; exit 1; fi
+cd "$BIN"
+setsid nohup ./llama-server \
+  -m "$MODEL" \
+  --host 0.0.0.0 --port 8216 \
+  -a qwen3.8-27b-ud-q4kxl-mtp \
+  -ngl 99 -fa on -c 65536 -b 4096 -ub 1024 \
+  -ctk f16 -ctv f16 --jinja --device Vulkan0 \
+  --spec-type draft-mtp -md "$MTP" -devd Vulkan0 -ngld all \
+  --spec-draft-n-max 3 \
+  > "$LOG" 2>&1 < /dev/null &
+echo $! > "$PIDF"
+echo "$(date -Is) started pid=$(cat $PIDF) model=UD-Q4_K_XL+MTP3"

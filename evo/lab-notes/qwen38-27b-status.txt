@@ -1,13 +1,13 @@
 status=UP
 time=2026-10-21T10:31:22+08:00
-endpoint=http://EVO_HOST:8216/v1
+endpoint=http://<lan-ip>:8216/v1
 alias=qwen3.8-27b-ud-q6k
 binary=$HOME/opt/unsloth-llama-b10698-mix-vulkan/llama-server
 backend=Vulkan0 R9700
 build=10698 commit b6e334953
-model=$MODELS_DIR/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q6_K.gguf
-mtp=$MODELS_DIR/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf size=1369590656
-bartowski=$MODELS_DIR/gguf/Qwen3.8-27B/bartowski-Qwen3.8-27B-Q6_K.gguf size=1113546752
+model=$HOME/models/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q6_K.gguf
+mtp=$HOME/models/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf size=1369590656
+bartowski=$HOME/models/gguf/Qwen3.8-27B/bartowski-Qwen3.8-27B-Q6_K.gguf size=1113546752
 smoke_file=$HOME/logs/smoke-qwen38-27b-ud-q6k.json
 restore_strata=cd ~/sparkdash-llm/qwen38-27b && setsid nohup ./start.sh > ~/logs/launcher-8216-restore.log 2>&1 < /dev/null &
 vram_gpu0_r9700=22615994368_bytes (~21.06GiB, rocm-smi 66%)
@@ -29,3 +29,72 @@ vram_gpu0_with_mtp=~24.2GiB
 serve_script=~/bin/serve-qwen38-27b-ud-q6k.sh (no-MTP backup: .bak-nomtp)
 bartowski bench: auto via ~/bin/watch-bartowski-bench.sh -> ~/logs/bench-vk-bartowski.log
 bartowski Q6_K Vulkan0: pp512 871.79 / pp8192 799.26 / tg128 22.98 (11:15, ~/logs/bench-vk-bartowski.log); 8216 restored MTP 11:15:54
+--- live 2026-10-21T14:38+08 ---
+model=UD-Q4_K_XL + MTP Q4_0 n=3
+flags=-ngl99 -fa on -c 65536 -b 4096 -ub 1024 -ctk f16 -ctv f16 --device Vulkan0 --spec-type draft-mtp -md mtp-Q4_0 -devd Vulkan0 -ngld all --spec-draft-n-max 3
+alias=qwen3.8-27b-ud-q6k port=8216
+backup=~/bin/serve-qwen38-27b-ud-q6k.sh.bak-q6k-mtp
+--- update 2026-10-21T16:55+08 (prefill sweep + KL) ---
+SWEEP UD-Q4_K_XL, fa1, b4096, r2 (logs ~/logs/sweep/*.md, script ~/bin/bench-prefill-sweep.sh)
+ vk mix coopmat ON  ub512/1024/2048/4096: pp512 916/898/891/889  pp4096 892/890/881/864  tg 28.8
+ vk mix coopmat OFF: pp512 ~420 pp4096 ~422 tg 28.7  (coopmat = 2.1x)
+ hip b10698 (plain/rocWMMA-FA/hipBLASLt all same): pp512 ~1178 pp4096 1113/1132/1130/1121 tg 27.8
+ hip master (blaslt same): pp512 ~1294 pp4096 1280/1295/1294/1286 tg 29.3  <- BEST (ub1024/2048, +46% pp vs live vk)
+ 5090 ref Q6_K: pp512 ~3100 tg ~63 -> R9700 best is 2.4x behind pp, 2.2x tg
+KL vs own Q8_0 (from BF16), c512 x100 chunks, Mean KLD wiki / code (99% KLD code):
+ bart-Q6_K 0.00181/0.00385(0.060)  UD-Q6_K 0.00216/0.00591(0.095)  UD-Q5_K_XL 0.00284/0.00830(0.134)
+ UD-Q4_K_XL 0.00648/0.01876(0.290)  UD-Q4_K_M 0.00896/0.02737(0.436)  UD-IQ4_XS 0.01598/0.04825(0.791)
+ (results ~/kl-eval/results)
+LIVE restored 16:51: Vulkan mix + UD-Q4_K_XL + MTP Q4_0 n3, b4096 ub1024 f16, alias qwen3.8-27b-ud-q4kxl-mtp
+ smoke: code 68.3 tok/s, prose 43.2 tok/s, VRAM 23.8GiB. script backups: .bak-hipmaster-b8192 (ROCm master variant), .final
+
+--- update 2026-10-21T17:02+08 (MTP decode on ROCm master — bench only, NOT switched) ---
+request=user chose bench-mtp-first before any permanent 8216 switch
+build=~/code/llama.cpp-master/build-hip  flags=-b 4096 -ub 1024 -c 65536 -ctk/v f16 -fa on MTP n-max3
+model=UD-Q4_K_XL + mtp-Q4_0  alias=qwen3.8-27b-ud-q4kxl-mtp (served OK)
+MTP decode (chat, max_tokens=256, temp0, thinking off; 2 runs):
+  code  70.8 / 71.4 tok/s  draft accept 185/206=89.8%
+  prose 54.9 / 54.7 tok/s  draft accept 164/272=60.3%
+no-MTP same build/prompts: code 29.3 / prose 29.3 tok/s  (matches sweep tg~29.3)
+compare Vulkan live (same prompts after restore; prior restore smoke was 68.3/43.2):
+  see this-turn VK re-smoke in logs/mtp-hipmaster-bench-* timeline
+VRAM hip no-MTP ~20.7GiB gpu0; 8217 untouched (200)
+LIVE restored to Vulkan mix + MTP n3 via .final; script unchanged
+logdir=~/logs/mtp-hipmaster-bench-20261021_170042
+fair_compare_same_prompts_this_turn:
+  Vulkan MTP: code 73.4 tok/s (186/206=90.3%)  prose 56.2 tok/s (164/272=60.3%)
+  ROCm master MTP: code ~71.1 tok/s (89.8%)  prose ~54.8 tok/s (60.3%)
+  ROCm master no-MTP: ~29.3 / 29.3
+  decode verdict: Vulkan slightly ahead (~3%); prefill still favors ROCm master (+46% pp from prior sweep)
+  prior 68.3/43.2 was different/shorter prompts — not for direct compare
+8216 left on Vulkan (.final). No permanent switch.
+
+== 2026-10-21 17:15 R9700 "be #1" push (partial; paused for 8216->ROCm switch) ==
+New master snapshot (GitHub master tarball 2026-10-21) at ~/code/llama.cpp-m1021, build-vk + build-hip (gfx1201, NO_VMM, GRAPHS) built.
+llama-bench UD-Q4_K_XL -fa 1 r3:
+  vk-old mix b10698: pp512 915.4 / pp4096 893.3 / tg128 28.87
+  vk-new m1021:      pp512 975.4 / pp4096 953.7 / tg128 29.71  (+6.6% pp, +2.9% tg)
+  vk-new -ub2048:    pp512 972.9 (no gain)
+Not run yet: HIP variants, MTP server sweep. Scripts: ~/r9700-push/{bench.sh,mtp.sh,all.sh}.
+
+== 2026-10-21 17:15 R9700 push (partial; paused for 8216->ROCm switch) ==
+master snapshot 2026-10-21 at ~/code/llama.cpp-m1021 (build-vk, build-hip gfx1201 NO_VMM GRAPHS)
+llama-bench UD-Q4_K_XL -fa 1 r3:
+  vk-old mix b10698: pp512 915.4 / pp4096 893.3 / tg128 28.87
+  vk-new m1021:      pp512 975.4 / pp4096 953.7 / tg128 29.71 (+6.6% pp, +2.9% tg)
+  vk-new -ub2048:    pp512 972.9 (no gain)
+HIP variants + MTP sweep not run. Scripts ~/r9700-push/{bench.sh,mtp.sh}; all.sh obsolete (does Vulkan restore).
+Leaderboard: our ROCm ~1294 pp already beats best published UD-Q4_K_XL (akougkas 1151).
+
+== 2026-10-21 17:13 8216 permanently switched to ROCm master ==
+binary: ~/code/llama.cpp-master/build-hip/bin/llama-server
+script: ~/bin/serve-qwen38-27b-ud-q6k.sh (bak Vulkan: .bak-vulkan-20261021; from .bak-hipmaster-b8192 with -b/-ub -> 2048/2048)
+alias: qwen3.8-27b-ud-q4kxl-mtp
+flags: -ngl 99 -fa on -c 65536 -b 2048 -ub 2048 -ctk f16 -ctv f16 --jinja --spec-type draft-mtp -md mtp-Q4_0 -ngld all --spec-draft-n-max 3
+weights: UD-Q4_K_XL + MTP Q4_0
+VRAM: ~25.4 GiB used (rocm-smi ~26.6G / 32.6G); first start OOM (sweep leftover), second OK
+fair chat (max_tokens 256, temp 0):
+  code:  67.6 tok/s  draft_accept 169/207 (81.6%)
+  prose: 47.2 tok/s  draft_accept 149/314 (47.5%)
+8217: still up (health 200). Sparks/dsv41 untouched.
+Note: user accepted ~3% decode tradeoff for +46% prefill vs Vulkan.
