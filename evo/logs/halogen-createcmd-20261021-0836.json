@@ -1,0 +1,1 @@
+["podman","run","-d","--name","halogen","--env-file","$HOME/halogen.env","-e","HIP_VISIBLE_DEVICES=1","--device","/dev/kfd","--device","/dev/dri","--group-add","keep-groups","--security-opt","label=disable","--ulimit","memlock=-1:-1","--ulimit","nofile=1048576:1048576","-v","$HOME/halogen-models:/models:ro","-p","8217:8731","ghcr.io/peonist-ai/halogen-flash-server:0.18.4","all"]

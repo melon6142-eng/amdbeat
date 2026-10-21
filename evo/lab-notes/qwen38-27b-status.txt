@@ -1,0 +1,31 @@
+status=UP
+time=2026-10-21T10:31:22+08:00
+endpoint=http://EVO_HOST:8216/v1
+alias=qwen3.8-27b-ud-q6k
+binary=$HOME/opt/unsloth-llama-b10698-mix-vulkan/llama-server
+backend=Vulkan0 R9700
+build=10698 commit b6e334953
+model=$MODELS_DIR/gguf/Qwen3.8-27B/Qwen3.8-27B-UD-Q6_K.gguf
+mtp=$MODELS_DIR/gguf/Qwen3.8-27B/mtp-Qwen3.8-27B-Q4_0.gguf size=1369590656
+bartowski=$MODELS_DIR/gguf/Qwen3.8-27B/bartowski-Qwen3.8-27B-Q6_K.gguf size=1113546752
+smoke_file=$HOME/logs/smoke-qwen38-27b-ud-q6k.json
+restore_strata=cd ~/sparkdash-llm/qwen38-27b && setsid nohup ./start.sh > ~/logs/launcher-8216-restore.log 2>&1 < /dev/null &
+vram_gpu0_r9700=22615994368_bytes (~21.06GiB, rocm-smi 66%)
+vram_gpu1_igpu=611155968_bytes (~0.57GiB, 8217 halogen untouched)
+smoke2_content=pong
+smoke2_decode_tok_s=21.9
+smoke2_prefill_tok_s=70.3
+mtp_run=DEFERRED (file ready; use -md mtp-Qwen3.8-27B-Q4_0.gguf --spec-draft-n-max N)
+bartowski_status=downloading_via_modelscope (~2.1G/22.22G at status write; resume OK with -C -)
+download_source=ModelScope (hf-mirror.com + huggingface.co both timed out on EVO)
+stop_8216_note=~/lab-notes/8216-restore-20261021.txt
+--- update 2026-10-21T10:46+08:00 ---
+bench UD-Q6_K Vulkan0: pp512 872.17 / pp8192 798.41 / tg128 24.63  (log ~/logs/bench-vk-ud.log)
+bench UD-Q6_K ROCm(gfx1201, self-built upstream tag b10698 at ~/code/llama.cpp-b10698/build-hip): pp512 864.42 / pp8192 780.19 / tg128 23.65 (~/logs/bench-hip-ud.log)
+winner=Vulkan (unsloth b10698 mix)
+live=Vulkan + MTP draft (--spec-type draft-mtp -md mtp-Qwen3.8-27B-Q4_0.gguf -devd Vulkan0 -ngld all --spec-draft-n-max 3)
+mtp_smoke: code 58.4 tok/s acc 0.758 (276/364); prose 41.2 tok/s acc 0.434 (225/519); n-max4 worse (55.9/38.4)
+vram_gpu0_with_mtp=~24.2GiB
+serve_script=~/bin/serve-qwen38-27b-ud-q6k.sh (no-MTP backup: .bak-nomtp)
+bartowski bench: auto via ~/bin/watch-bartowski-bench.sh -> ~/logs/bench-vk-bartowski.log
+bartowski Q6_K Vulkan0: pp512 871.79 / pp8192 799.26 / tg128 22.98 (11:15, ~/logs/bench-vk-bartowski.log); 8216 restored MTP 11:15:54

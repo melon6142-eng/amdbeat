@@ -1,0 +1,11 @@
+# Restore strata 8216 (stopped 2026-10-21 for Qwen3.8-27B GGUF experiment on R9700)
+# Stopped because: user OK via model-lab 09:49 — 8216 idle, swap to UD-Q6_K on Vulkan0
+# Do NOT touch 8217 (halogen) or Spark dsv41.
+
+Restore command:
+  cd ~/sparkdash-llm/qwen38-27b && setsid nohup ./start.sh > ~/logs/launcher-8216-restore.log 2>&1 < /dev/null &
+
+Config: strata-iq3_xxs-r9700-8216-w4b.json
+Stop script: ~/sparkdash-llm/qwen38-27b/stop.sh
+Port: 8216
+Verify: curl -sS http://127.0.0.1:8216/v1/models
