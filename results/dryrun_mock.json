@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "endpoint_name": "mock",
+    "model": "mock-bf16",
+    "base_url": "http://127.0.0.1:18765/v1",
+    "seed": 42,
+    "dry_run": true,
+    "generated_at": "2026-10-21T01:41:58Z"
+  },
+  "speed": [
+    {
+      "depth_tokens_requested": 0,
+      "concurrency": 1,
+      "n_runs": 2,
+      "ttft_s_mean": 0.00832728750538081,
+      "prefill_tok_s_mean": 240.19185137238546,
+      "decode_tok_s_mean": 374.80619219350206,
+      "prompt_tokens_mean": 2,
+      "completion_tokens_mean": 76
+    },
+    {
+      "depth_tokens_requested": 512,
+      "concurrency": 1,
+      "n_runs": 2,
+      "ttft_s_mean": 0.009485312992183026,
+      "prefill_tok_s_mean": 60731.05728735168,
+      "decode_tok_s_mean": 377.9644914831903,
+      "prompt_tokens_mean": 576,
+      "completion_tokens_mean": 77
+    },
+    {
+      "depth_tokens_requested": 2048,
+      "concurrency": 1,
+      "n_runs": 2,
+      "ttft_s_mean": 0.012810413500119466,
+      "prefill_tok_s_mean": 179349.03152164887,
+      "decode_tok_s_mean": 376.3061153516863,
+      "prompt_tokens_mean": 2297,
+      "completion_tokens_mean": 76
+    }
+  ],
+  "eval": [
+    {
+      "id": "kl_01",
+      "suite": "kl",
+      "ok": null,
+      "text": "quant lab bench mock ok quant lab bench",
+      "has_logprobs": true,
+      "latency_s": 0.008579203000408597
+    },
+    {
+      "id": "kl_02",
+      "suite": "kl",
+      "ok": null,
+      "text": "quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant",
+      "has_logprobs": true,
+      "latency_s": 0.009501987995463423
+    },
+    {
+      "id": "kl_03",
+      "suite": "kl",
+      "ok": null,
+      "text": "lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock",
+      "has_logprobs": true,
+      "latency_s": 0.01777143699291628
+    },
+    {
+      "id": "kl_04",
+      "suite": "kl",
+      "ok": null,
+      "text": "ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench",
+      "has_logprobs": true,
+      "latency_s": 0.00748324699816294
+    },
+    {
+      "id": "kl_05",
+      "suite": "kl",
+      "ok": null,
+      "text": "ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench mock ok quant lab bench",
+      "has_logprobs": true,
+      "latency_s": 0.008523087002686225
+    },
+    {
+      "id": "gsm_01",
+      "suite": "gsm8k_subset",
+      "ok": true,
+      "text": "She has 3 + 2*4 = 11 apples.\n11",
+      "has_logprobs": false,
+      "latency_s": 0.007228400994790718
+    },
+    {
+      "id": "gsm_02",
+      "suite": "gsm8k_subset",
+      "ok": true,
+      "text": "60 / 1.5 = 40\n40",
+      "has_logprobs": false,
+      "latency_s": 0.00872445800632704
+    },
+    {
+      "id": "humaneval_01",
+      "suite": "humaneval_subset",
+      "ok": true,
+      "text": "```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    t = re.sub(r'[^a-z0-9]', '', s.lower())\n    return t == t[::-1]\n```",
+      "has_logprobs": false,
+      "latency_s": 0.00750140099262353
+    },
+    {
+      "id": "ifeval_01",
+      "suite": "ifeval_subset",
+      "ok": true,
+      "text": "- red\n- blue\n- yellow",
+      "has_logprobs": false,
+      "latency_s": 0.008585219009546563
+    }
+  ]
+}

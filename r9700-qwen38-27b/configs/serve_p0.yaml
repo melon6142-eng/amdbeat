@@ -1,0 +1,18 @@
+# Reference config mirroring start.sh P0 defaults (documentation only).
+model_alias: qwen38-27b-ud-q6k
+repo: unsloth/Qwen3.8-27B-GGUF
+file: Qwen3.8-27B-UD-Q6_K.gguf
+gib: 20.47
+host: 0.0.0.0
+port: 8216
+ngl: 99
+ctx: 32768
+batch: 2048
+ubatch: 512
+flash_attn: on
+jinja: true
+mmap: true
+parallel_slots: 1
+backend: rocm  # or vulkan — TODO measure
+gpu: r9700
+kv_estimate_gib_per_32k: 2.0

@@ -1,0 +1,15 @@
+*.bin
+*.ckpt
+*.gguf
+*.hgn
+*.key
+*.onnx
+*.pem
+*.pt
+*.safetensors
+*credential*
+*secret*
+.env
+.env.*
+__pycache__/
+results/runs/

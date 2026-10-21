@@ -1,0 +1,70 @@
+{
+  "n": 5,
+  "top1_agreement": 0.4,
+  "mean_partial_kl": 6.783360877083924,
+  "rows": [
+    {
+      "id": "kl_01",
+      "top1_agree": false,
+      "top1_ref": "quant",
+      "top1_cand": "lab",
+      "topk_jaccard": 0.42857142857142855,
+      "partial_kl": 11.303962804049938,
+      "ref_has_logprobs": true,
+      "cand_has_logprobs": true
+    },
+    {
+      "id": "kl_02",
+      "top1_agree": false,
+      "top1_ref": "quant",
+      "top1_cand": "lab",
+      "topk_jaccard": 0.42857142857142855,
+      "partial_kl": 11.303962804049938,
+      "ref_has_logprobs": true,
+      "cand_has_logprobs": true
+    },
+    {
+      "id": "kl_03",
+      "top1_agree": false,
+      "top1_ref": "lab",
+      "top1_cand": "quant",
+      "topk_jaccard": 0.42857142857142855,
+      "partial_kl": 11.303962804049938,
+      "ref_has_logprobs": true,
+      "cand_has_logprobs": true
+    },
+    {
+      "id": "kl_04",
+      "top1_agree": true,
+      "top1_ref": "ok",
+      "top1_cand": "ok",
+      "topk_jaccard": 1.0,
+      "partial_kl": 0.002457986634901591,
+      "ref_has_logprobs": true,
+      "cand_has_logprobs": true
+    },
+    {
+      "id": "kl_05",
+      "top1_agree": true,
+      "top1_ref": "ok",
+      "top1_cand": "ok",
+      "topk_jaccard": 1.0,
+      "partial_kl": 0.002457986634901591,
+      "ref_has_logprobs": true,
+      "cand_has_logprobs": true
+    }
+  ],
+  "meta": {
+    "ref": {
+      "base_url": "http://127.0.0.1:18765/v1",
+      "model": "mock-bf16"
+    },
+    "cand": {
+      "base_url": "http://127.0.0.1:18765/v1",
+      "model": "mock-quant"
+    },
+    "k": 5,
+    "generated_at": "2026-10-21T01:42:00Z",
+    "limitations": "partial KL over top-k only; see module docstring"
+  }
+}

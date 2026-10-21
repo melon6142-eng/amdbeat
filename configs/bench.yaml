@@ -1,0 +1,26 @@
+seed: 42
+temperature: 0.0
+top_p: 1.0
+timeout_s: 120
+
+speed:
+  # prompt token depths for decode/prefill probes (approx; mock uses char/4)
+  depths: [0, 512, 2048]
+  # full lab scorecard should use [0, 32768, 131072] when hardware allows
+  decode_tokens: 64
+  concurrency: [1]
+  # full: [1, 4]
+  warmup: 1
+  repeats: 2
+
+eval:
+  prompts_file: "prompts/fixed_prompts.jsonl"
+  suites: ["kl", "gsm8k_subset", "humaneval_subset", "ifeval_subset"]
+  # long_needle disabled by default (needs depth expansion)
+
+kl:
+  logprobs: 5
+  # top-k agreement vs reference endpoint when both return logprobs
+  top_k: 5
+
+output_dir: "results"
