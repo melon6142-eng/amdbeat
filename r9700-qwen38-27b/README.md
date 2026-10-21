@@ -44,3 +44,7 @@ Hooks: `../scripts/bench_client.py` · scorecard: `results/scorecard_template.md
 4. (Optional) mirror: hf-mirror / ModelScope
 
 Details, flags, download templates → [`RECIPE.md`](RECIPE.md) · file list → [`VERIFIED_FILES.md`](VERIFIED_FILES.md) · Phase 2 → [`PHASE2.md`](PHASE2.md).
+
+## Latest (2026-10-21): rdna-boosts live config
+
+1327 pp2048, 30.9 tg, and 75.4 / 62.1 MTP chat on one R9700. See [`results/RDNA-BOOSTS-2026-10-21.md`](results/RDNA-BOOSTS-2026-10-21.md).
